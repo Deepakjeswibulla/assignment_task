@@ -332,3 +332,46 @@ To recreate this app:
 5. Register users, create group, add members, add expenses (try all 4 split types).
 6. Verify balances update; record settlement; confirm chat live updates.
 7. Run `npm test` — split and balance tests must pass.
+## 12. Development timeline
+
+1. Requirements were converted into a Splitwise-inspired MVP.
+2. Database schema was designed first to keep expense relationships normalized.
+3. Authentication and group management were implemented before financial logic.
+4. Expense splitting algorithms were isolated into reusable utility modules and unit tested.
+5. Balance calculation was implemented separately from storage to simplify reasoning.
+6. Settlement logic was added on top of existing debt computation.
+7. Real-time expense chat was integrated using Socket.io with persistent message storage.
+8. Documentation and deployment configuration were finalized after production build verification.
+
+## 13. Design decisions
+
+- UUID primary keys avoid integer collisions and simplify distributed creation.
+- Expense splits are stored as computed monetary values instead of recalculating every request.
+- Settlement records are immutable financial events instead of directly modifying balances.
+- Balance computation derives current state from expenses and settlements instead of storing running totals.
+- Socket.io is used only for chat while all financial state changes remain HTTP based for consistency.
+- JWT sessions reduce server-side session storage requirements.
+
+## 14. Testing strategy
+
+Business-critical logic is covered with unit tests.
+
+Covered modules:
+- Equal split calculation
+- Unequal split validation
+- Percentage split validation
+- Share-based split calculation
+- Group balance computation
+- Cross-group balance aggregation
+
+Manual verification:
+- User registration
+- User login
+- Group creation
+- Member management
+- Expense creation
+- Settlement recording
+- Balance updates
+- Expense chat
+- Production build
+- Render deployment
