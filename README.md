@@ -115,3 +115,10 @@ tests/           Vitest unit tests
 ## License
 
 MIT — internship assignment submission.
+# SplitShare
+
+A Splitwise-inspired expense sharing web app built for an internship assignment.
+
+## Live Demo
+
+https://splitshare-new.onrender.com
