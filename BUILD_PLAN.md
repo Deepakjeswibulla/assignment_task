@@ -1,72 +1,229 @@
-# BUILD_PLAN.md — Implementation roadmap
+# BUILD_PLAN.md — SplitShare Implementation Plan
 
-Phases are executed sequentially. Check off items as completed.
+# 1. Product Research
 
-## Phase 0 — Documentation foundation ✅
-- [x] Create `AI_CONTEXT.md` with product, schema, logic, API
-- [x] Create `BUILD_PLAN.md` (this file)
-- [x] Create `PROMPTS.md` for key prompts record
+## Studying Splitwise
 
-## Phase 1 — Project scaffold ✅
-- [x] Initialize Next.js 14 + TypeScript + Tailwind + App Router
-- [x] Add Prisma, NextAuth, Zod, bcrypt, Socket.io, Vitest
-- [x] Configure `package.json` scripts (`dev`, `build`, `start`, `test`)
-- [x] Create `server.ts` custom server integrating Socket.io
-- [x] Add `.env.example`, `.gitignore`
+Before implementation, the core Splitwise workflows were analyzed to identify the minimum viable product suitable for a short internship assignment.
 
-## Phase 2 — Database ✅
-- [x] Write `prisma/schema.prisma` per AI_CONTEXT §3
-- [x] Run initial migration (`prisma/migrations/20250605000000_init`)
-- [x] Seed script (`prisma/seed.ts`)
+### Core workflows identified
 
-## Phase 3 — Core libraries ✅
-- [x] `src/lib/prisma.ts` — singleton client
-- [x] `src/lib/splits.ts` — all 4 split modes + tests
-- [x] `src/lib/balances.ts` — group + individual balances + tests
-- [x] `src/lib/validations.ts` — Zod schemas
-- [x] `src/lib/auth.ts` — NextAuth config
+* User authentication using email and password
+* Creating groups for shared expenses
+* Adding and removing members from groups
+* Creating expenses with multiple split methods
+* Viewing group balances
+* Viewing overall individual balances
+* Recording settlements between members
+* Discussing expenses through real-time chat
 
-## Phase 4 — Authentication ✅
-- [x] Register API route
-- [x] NextAuth credentials provider
-- [x] Middleware protecting `/` and `/groups/*`
-- [x] Login / Register pages
+### Product assumptions
 
-## Phase 5 — Groups ✅
-- [x] Groups API (list, create, detail)
-- [x] Members API (add by email, remove)
-- [x] Dashboard page (group list)
-- [x] Group detail page (members, expenses list)
+To keep the scope realistic while preserving the primary user experience:
 
-## Phase 6 — Expenses ✅
-- [x] Expenses API (create with split validation, list)
-- [x] New expense form (dynamic fields per split type)
-- [x] Expense detail page with split breakdown
+* Single currency per group
+* Email acts as the unique user identifier
+* No email verification
+* No recurring expenses
+* No receipt scanning
+* No notifications
+* No expense deletion flow
+* Creator remains the permanent administrator
 
-## Phase 7 — Balances & settlements ✅
-- [x] Group balances API + UI component
-- [x] Individual summary on dashboard
-- [x] Settlements API + form
-- [x] Wire settlements into balance display
+---
 
-## Phase 8 — Real-time chat ✅
-- [x] Socket.io server auth + room logic
-- [x] Messages API (persist + history)
-- [x] Chat UI on expense detail page
-- [x] Client socket connection with HTTP fallback
+# 2. Architecture
 
-## Phase 9 — Tests & polish ✅
-- [x] Vitest: splits.test.ts, balances.test.ts (12 tests passing)
-- [x] UI consistency pass (layout, nav, error states)
-- [x] Loading states on client components
+## Technology Stack
 
-## Phase 10 — Deployment ✅
-- [x] `render.yaml` blueprint
-- [x] Production build verification (`npm run build` passes)
-- [x] Final `README.md`
-- [x] Audit `AI_CONTEXT.md` for accuracy
+| Layer          | Technology                           |
+| -------------- | ------------------------------------ |
+| Frontend       | Next.js 14 (App Router) + TypeScript |
+| Styling        | Tailwind CSS                         |
+| Backend        | Next.js Route Handlers               |
+| Authentication | NextAuth Credentials + JWT           |
+| Database       | PostgreSQL                           |
+| ORM            | Prisma                               |
+| Validation     | Zod                                  |
+| Real-time      | Socket.io                            |
+| Testing        | Vitest                               |
+| Deployment     | Render                               |
 
-## Phase 11 — Final audit ✅
-- [x] All required features implemented in code
-- [x] Docs consistent with code
-- [x] No TODOs on core paths
+## Database Design
+
+The application uses a normalized relational schema consisting of:
+
+* User
+* Group
+* GroupMember
+* Expense
+* ExpenseSplit
+* Settlement
+* ExpenseMessage
+
+Relationships are designed to support flexible expense splitting while maintaining data consistency.
+
+## API Design
+
+REST endpoints provide:
+
+* Authentication
+* Group management
+* Member management
+* Expense creation
+* Balance calculation
+* Settlement recording
+* Expense chat history
+
+Socket.io provides real-time expense chat updates.
+
+## Frontend Structure
+
+Pages implemented:
+
+* Login
+* Register
+* Dashboard
+* Group Detail
+* New Expense
+* Expense Detail
+* New Settlement
+
+Business logic is separated into reusable libraries for:
+
+* Split calculation
+* Balance calculation
+* Authentication
+* Validation
+* Database access
+
+## Deployment
+
+Deployment uses Render with:
+
+* Render PostgreSQL
+* Node Web Service
+* Prisma migrations
+* Custom server.ts for Next.js + Socket.io
+
+---
+
+# 3. AI Collaboration Process
+
+AI was used as a development collaborator throughout the project.
+
+The workflow followed was:
+
+1. Define product scope.
+2. Document requirements in AI_CONTEXT.md.
+3. Produce an implementation roadmap.
+4. Generate individual modules.
+5. Review generated code.
+6. Resolve dependency conflicts.
+7. Configure PostgreSQL and Prisma.
+8. Fix NextAuth version compatibility.
+9. Validate build and deployment.
+10. Deploy and verify production behavior.
+
+AI-generated outputs were reviewed and modified when necessary to maintain consistency with the intended architecture.
+
+AI_CONTEXT.md was continuously updated to remain the single source of truth for:
+
+* Product scope
+* Architecture
+* Database schema
+* API design
+* Business logic
+* Deployment decisions
+* Trade-offs
+
+---
+
+# 4. Trade-offs
+
+Several deliberate simplifications were made to keep the project achievable within the assignment timeline.
+
+## Simplified
+
+* Single currency support
+* Email-based member addition
+* JWT sessions
+* Group creator remains administrator
+* Expense chat scoped to individual expenses
+
+## Avoided
+
+* OAuth login
+* Multi-currency conversion
+* Push notifications
+* Receipt OCR
+* Recurring expenses
+* Native mobile application
+* Non-relational databases
+
+## Future Improvements
+
+With additional development time, the following features would be added:
+
+* Live balance refresh without manual page reload
+* Improved settlement form UX
+* Admin transfer functionality
+* Expense editing and deletion
+* Group invitations via email
+* Notifications
+* Better responsive design
+* Optimistic UI updates
+* Enhanced integration tests
+
+---
+
+# 5. Verification Checklist
+
+## Development
+
+* Next.js application configured
+* Prisma schema implemented
+* PostgreSQL connected
+* Authentication functional
+* Expense split logic implemented
+* Settlement logic implemented
+* Socket.io chat implemented
+
+## Testing
+
+* Split calculation tests passing
+* Balance calculation tests passing
+
+## Production
+
+* npm install
+* prisma migrate
+* npm test
+* npm run build
+* npm run dev
+
+verified successfully.
+
+## Deployment
+
+Application successfully deployed on Render using PostgreSQL and a custom Node server with Socket.io support.
+
+---
+
+# 6. Final Status
+
+All assignment requirements have been implemented:
+
+* Authentication
+* Group management
+* Expense management
+* Equal, unequal, percentage, and share splits
+* Balance summaries
+* Settlement recording
+* Real-time expense chat
+* Relational database
+* Public deployment
+* Documentation
+* AI context preservation
+
+The repository, deployed application, AI_CONTEXT.md, BUILD_PLAN.md, README.md, and supporting documentation together provide sufficient information for another engineer or AI system to recreate a substantially similar implementation.
